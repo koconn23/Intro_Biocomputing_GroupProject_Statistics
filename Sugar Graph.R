@@ -4,6 +4,11 @@ sugar = read.csv(file = "sugar.csv", header=TRUE)
 
 library(ggplot2)
 
+
+
+
+
+
 plot1 <- ggplot(sugar, aes(x=sugar, y=growth)) +
   # geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ x) +
   geom_point(color = "blue1", shape = 16, size = 2) +
