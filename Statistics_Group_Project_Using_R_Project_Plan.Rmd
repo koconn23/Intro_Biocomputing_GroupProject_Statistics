@@ -1,0 +1,24 @@
+---
+title: "Statistics Group Project Using R Project Plan"
+author: "Libby Fortin (efortin@nd.edu), Keith O'Connor (koconn23@nd.edu), Chelsea Weibel (cweibel@nd.edu)"
+date: "11/27/2017"
+output: html_document
+---
+
+### 11/27/2017: 
+
++ Keith created a repository in Github and added Libby and Chelsea as collaborators.
+
++ Started the plots for questions 1 (antibiotics effects on growth of E. coli) and 2 (sugar effects on growth).
+
++ These were then compiled into a dated R-markdown document to keep track of progress. The most up-to-date code is in the R-markdown sheet.
+
+### 11/29/2017:
+
++ Start looking at antibiotic treatments on the growth of E. coli using an ANOVA-design linear model and likelihood ratio test.
+
++ Start testing for an effect of sugar concentration on growth of E. coli using a regression-design linear model and likelihood ratio test.
+
+
+
+

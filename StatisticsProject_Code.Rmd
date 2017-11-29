@@ -1,45 +1,55 @@
 ---
-title: "Group Project Keith, Chelsea, Libby"
-author: "Keith_O'Connor"
+title: "Statistics Group Project Using R"
+author: "Libby Fortin (efortin@nd.edu), Keith O'Connor (koconn23@nd.edu), Chelsea Weibel (cweibel@nd.edu)"
 date: "11/27/2017"
 output: html_document
 ---
 
-Question 1: Evaluating the effect of three different new antibiotics on growth of E. coli in lab cultures.
+### Question 1: Evaluating the effect of three different new antibiotics on growth of E. coli in lab cultures.
 
 ```{r}
+#### Linear plot of antibiotics effects on growth of E. coli ####
+
 library(ggplot2)
 
 antibiotics <- read.csv("antibiotics.csv")
       
 plot1 <- ggplot(antibiotics, aes(x = trt, y = growth)) +
-       geom_boxplot() + 
+      geom_boxplot() + 
       theme_bw() + 
+      xlab("Antibiotic Type") + ylab("E. coli Growth") +
+      theme(plot.title = element_text(hjust = 0.5)) + # Centers the title
       ggtitle("Different Antibiotics on Growth")
                         
 plot1
 
 ```
 
-Question 2: Evaluating the effect of sugar concentration on growth of E. coli in lab cultures.
+#### Next, we need to look at antibiotic treatments on the growth of E. coli using an ANOVA-design linear model and likelihood ratio test. (11/29/17)
+
+
 ```{r}
-#### Linear plot with line equation and R2
+
+```
+
+### Question 2: Evaluating the effect of sugar concentration on growth of E. coli in lab cultures.
+```{r}
+#### Linear plot of sugar effects on growth with line equation and R2 ####
 
 sugardata <- read.csv(file = "sugar.csv", header=TRUE)
 
 plot2 <- ggplot(data = sugardata, aes(x = sugar, y = growth))+
-  geom_smooth(method = "lm", se=FALSE, color="black", formula = y ~ x) +
   geom_point(color = "blue1", shape = 16, size = 2) +
   theme_classic() +
   xlab("sugar") + ylab("growth") +
   ggtitle("Sugar vs. Growth") +
-  theme(plot.title = element_text(hjust = 0.5)) +
-  stat_smooth(method = "lm", se=FALSE, color="black") + 
-  geom_text(aes(x = 5, y = 25, label = lm_eqn1(lm(sugar ~ growth, sugardata))), parse = TRUE)
+  theme(plot.title = element_text(hjust = 0.5)) + #Centers the title
+  stat_smooth(method = "lm", se=FALSE, color="black") + #Adds a trend line, se=FALSE gets rid of cloud around trendline.
+  geom_text(aes(x = 5, y = 25, label = lm_eqn1(lm(sugar ~ growth, sugardata))), parse = TRUE) # Adds the values for the R2 value and equation of the trendline to the coordinates x and y
 
 m= lm(sugar ~ growth, sugardata)
 
-lm_eqn1 = function(m) {
+lm_eqn1 = function(m) {       #Function to calculate and add R2 value and equation of the trendline to plot
   
   l <- list(a = format(coef(m)[1], digits = 2),
             b = format(abs(coef(m)[2]), digits = 2),
@@ -58,3 +68,4 @@ plot2
 
 ```
 
+#### Next, we need test for an effect of sugar concentration on growth of E. coli using a regression-design linear model and likelihood ratio test. (11/29/17)
