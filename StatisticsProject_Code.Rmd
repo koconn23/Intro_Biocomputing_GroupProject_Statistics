@@ -33,16 +33,19 @@ plot1
 ```
 
 ### Question 2: Evaluating the effect of sugar concentration on growth of E. coli in lab cultures.
+
 ```{r}
 #### Linear plot of sugar effects on growth with line equation and R2 ####
+
+library(ggplot2)
 
 sugardata <- read.csv(file = "sugar.csv", header=TRUE)
 
 plot2 <- ggplot(data = sugardata, aes(x = sugar, y = growth))+
   geom_point(color = "blue1", shape = 16, size = 2) +
   theme_classic() +
-  xlab("sugar") + ylab("growth") +
-  ggtitle("Sugar vs. Growth") +
+  xlab("Sugar Concentration") + ylab("E. coli Growth") +
+  ggtitle("Effect of Sugar Concentration on Growth of E. coli") +
   theme(plot.title = element_text(hjust = 0.5)) + #Centers the title
   stat_smooth(method = "lm", se=FALSE, color="black") + #Adds a trend line, se=FALSE gets rid of cloud around trendline.
   geom_text(aes(x = 5, y = 25, label = lm_eqn1(lm(sugar ~ growth, sugardata))), parse = TRUE) # Adds the values for the R2 value and equation of the trendline to the coordinates x and y
@@ -69,3 +72,59 @@ plot2
 ```
 
 #### Next, we need test for an effect of sugar concentration on growth of E. coli using a regression-design linear model and likelihood ratio test. (11/29/17)
+
+```{r}
+
+#### Likelihood ratio test
+
+############## Null model
+# Null hypothesis = the growth of E. coli is the same regardless of the sugar concentration
+
+nllnull = function(p,y){
+  B0=p[1]
+  sig=exp(p[2])
+  expected=B0
+  nll=-sum(dnorm(x=y, mean=expected, sd=sig,log=TRUE))
+  return(nll)
+}
+
+initialGuess = c(5,1)
+null = optim(par=initialGuess,fn=nllnull,y=sugardata$growth)
+print(null)
+
+
+################ Linear Model
+# Alternative hypothesis = the growth of E. coli is dependent on the sugar concentration
+
+nllike_linear=function(p,x,y){
+  B0=p[1]
+  B1=p[2]
+  sigma=exp(p[3])
+  
+  expected=B0+B1*x
+  
+  nll_linear=-sum(dnorm(x=y,mean=expected,sd=sigma,log=TRUE))
+  return(nll_linear)
+}
+
+initialGuess=c(5,1,1)
+fit_linear=optim(par=initialGuess,fn=nllike_linear,x=sugardata$sugar,y=sugardata$growth)
+
+print(fit_linear)
+
+
+############# likelihood ratio test
+q = 2*(null$value-fit_linear$value)
+lrt = pchisq(q=q, df=1, lower.tail=FALSE)
+print(lrt)
+
+# Becuase the p-value is less than 0.05 (2.64e-10), this means that we can reject the null hypothesis and conclude that there is a significant effect of sugar concentration on E. coli growth
+
+```
+
+
+
+
+
+
+
