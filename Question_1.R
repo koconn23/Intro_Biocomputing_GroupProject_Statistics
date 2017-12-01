@@ -4,7 +4,8 @@
 antibiotics <- read.csv("antibiotics.csv")
 
 # Since we're testing the difference between the presence of an antibiotic or not, this is a for-loop
-# that will put a zero for control, or no antibiotic, or a 1 for antibiotic in the data table
+# that will put a zero for control, or no antibiotic, or a 1 for antibiotic in a new column in the data table
+# called 'aborct'
 for (i in 1:nrow(antibiotics)){
   if (antibiotics$trt[i] == 'control'){
     antibiotics$aborct[i] <- 0
