@@ -123,6 +123,7 @@ results[2,3] <- pchisq(q=B, df=1, lower.tail=FALSE)
 results[3,3] <- pchisq(q=C, df=1, lower.tail=FALSE)
 results
 ```
+##### All of the antibiotic treatments have a significant effect on growth because the chi squared values are all less than 0.05!
 
 ### Question 2: Evaluating the effect of sugar concentration on growth of E. coli in lab cultures.
 
