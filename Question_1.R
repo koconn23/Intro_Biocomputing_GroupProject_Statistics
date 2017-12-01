@@ -17,7 +17,6 @@ for (i in 1:nrow(antibiotics)){
 
 # These are all subsets of the data that contain the control and one of the antibiotics and the growth
 # associated with each treatment
-control <- antibiotics[antibiotics$trt == 'control',]
 ab1 <- antibiotics[antibiotics$trt == 'control',]
 ab1[5:8,] <- antibiotics[antibiotics$trt == 'ab1',]
 ab2 <- antibiotics[antibiotics$trt == 'control',]
