@@ -13,16 +13,17 @@ youtput <-list()
 
 for (sim_number in 1:num_sims){ # This starts your for loop
   x = sample(x = 0:50, size = 24) # Creates a random generation of 24 x-values between 0 and 50 
+  outputx[,sim_number] <- x
   m <- 0.4 # Given slope value
   b <- 10 # Given y-intercept
-  y <- m*x + b # Calculates y-values from the 24 randomly generated x-values using given slope and intercept 
-  outputx[,sim_number] <- x
-  
-for (sigma_number in 1:sigma_num){
-   outputy = y+rnorm(length(y), mean=0, sd=sigma[sigma_number])
+  y = m*x + b # Calculates y-values from the 24 randomly generated x-values using given slope and intercept 
+  outputy[,sim_number] <- y
+}
+outputy
+  for (sigma_number in 1:sigma_num){
+   outputy[,sim_number] = outputy[,sim_number]+rnorm(length(outputy[,sim_number]), mean=0, sd=sigma[sigma_number])
    youtput[[sigma_number]] <- outputy
   }
-}
 
 youtput[[1]]
 
