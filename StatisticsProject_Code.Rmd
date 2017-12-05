@@ -218,26 +218,26 @@ print(lrt)
 ### Statistical_Power_Analysis
 
 ```{r}
-#### A statistical power analysis ####
-library(ggplot2)
+size = 24 # Creates a random generation of 24 x-values between 0 and 50 
+  outputx[,sim_number] #### A statistical power analysis ####
 
 num_sims <- 10 # Simulate the data 10 times 
 n_per_sim <- 24 # Each simulation will have 24 values
 set.seed(24) # Seed is necessary for reproducibility 
-sigma_num <- 8
-sigma <- c(1,2,4,6,8,12,16,24)
+sigma_num <- 8 # The amount of sigma values for this analysis
+sigma <- c(1,2,4,6,8,12,16,24) ###### DO WE USE THIS FOR THIS FIRST PART OF THE CODE? I just wanted to make sure before I deleted it ######
 
-outputx<-as.data.frame(matrix(0, ncol=10, nrow=24))
-outputy<-as.data.frame(matrix(0, ncol=10, nrow=24))
-youtput <-list()
+outputx<-as.data.frame(matrix(0, ncol=10, nrow=24)) # Empty matrix to compile the 10 reiterations of the 24 randomly generated x variables
+outputy<-as.data.frame(matrix(0, ncol=10, nrow=24)) # Empty matrix to compile the 10 reiterations of the 24 randomly generated y variables
+youtput <-list() # Empty file to compile the output matrices into a list
 
 for (sim_number in 1:num_sims){ # This starts your for loop
-  x = sample(x = 0:50, size = 24) # Creates a random generation of 24 x-values between 0 and 50 
-  outputx[,sim_number] <- x
+  x = sample(x = 0:50, size = 24) 
+  outputx[,sim_number] <- x # Puts the randomly generated x-values with 10 iterations into empty matrix created before the for-loop 
   m <- 0.4 # Given slope value
   b <- 10 # Given y-intercept
   y = m*x + b # Calculates y-values from the 24 randomly generated x-values using given slope and intercept 
-  outputy[,sim_number] <- y
+  outputy[,sim_number] <- y # Puts the randomly generated y-values with 10 iterations into empty matrix created before the for-loop 
 }
 
   for (sigma_number in 1:sigma_num){
@@ -245,84 +245,99 @@ for (sim_number in 1:num_sims){ # This starts your for loop
    youtput[[sigma_number]] <- outputy
   }
 
+nllresults <- list()
 
+value.mat <- matrix(NA,8,10)
+par.mat <- array(NA,dim = c(2,8,10))
 
+par.mat[,1,1]
 
-#### Linear Regression ####
+nllnull <- function(p,y){
+  B0=p[1]
+  sig=exp(p[2])
+  expected=B0
+  nll=-sum(dnorm(x=y, mean=expected, sd=sig,log=TRUE))
+  return(nll)
+}
 
+for(sigma_number in 1:8){
+  #for(n_per_sim in 1:24){
+    for(num_sims in 1:10){
 
+#Null model function
 
+initialGuess = c(1,1)
+null = optim(par=initialGuess,fn=nllnull,y=as.matrix(youtput[[sigma_number]][,num_sims]))
+#nllresults[[num_sims]]  <- null
+#print(nllresults)
+
+value.mat[sigma_number,num_sims] <- null$value
+
+par.mat[,sigma_number,num_sims] <- null$par
+
+    }
+  #}
+}
+
+lapply(nllresults,x$par)
+
+#Linear Model function
+nlllinear <- function(p,x,y){
+  B0=p[1]
+  B1=p[2]
+  sig=exp(p[3])
+  expected=B0+B1*x
+  nll=-sum(dnorm(x=y, mean=expected, sd=sig,log=TRUE))
+  return(nll)
+}
 
 #### ANOVA ####
-############## THIS SHOULD WORK TOO!!!!
 
-#2-level anova
-x = c(13,13,13,13,13,13,13,13,13,13,13,13,38,38,38,38,38,38,38,38,38,38,38,38)
-x_values = matrix(rep(x,10),nrow=24,ncol=10)
-num_sims <- 10 # Simulate the data 10 times 
-n_per_sim <- 24 # Each simulation will have 24 values
-set.seed(24) # Seed is necessary for reproducibility 
-sigma_num <- 8
-sigma <- c(1,2,4,6,8,12,16,24)
+## 2-level ANOVA ##
+x2 = c(13,13,13,13,13,13,13,13,13,13,13,13,38,38,38,38,38,38,38,38,38,38,38,38)
+x_values2 = matrix(rep(x2,10),nrow=24,ncol=10)
 
-y <- .4 * x_values + 10
+y2 <- .4 * x_values2 + 10
 
-outputy<-as.data.frame(matrix(0, ncol=10, nrow=24))
-youtput <-list()
+outputy2 <-as.data.frame(matrix(0, ncol=10, nrow=24))
+youtput2 <-list()
 
   for (sigma_number in 1:sigma_num){
-    outputy = y + rnorm(length(y), mean=0, sd=sigma[sigma_number])
+    outputy2 = y2 + rnorm(length(y2), mean=0, sd=sigma[sigma_number])
     
-    youtput[[sigma_number]] <- outputy
+    youtput2[[sigma_number]] <- outputy2
   }
 
+## 4-level ANOVA ##
+x4 = c(10,10,10,10,10,10,20,20,20,20,20,20,30,30,30,30,30,30,40,40,40,40,40,40)
+x_values4 = matrix(rep(x4,10),nrow=24,ncol=10)
 
 
+y4 <- .4 * x_values4 + 10
 
-############# 4-level anova
-x = c(10,10,10,10,10,10,20,20,20,20,20,20,30,30,30,30,30,30,40,40,40,40,45,45,45,45)
-x_values = matrix(rep(x,10),nrow=24,ncol=10)
-num_sims <- 10 # Simulate the data 10 times 
-n_per_sim <- 24 # Each simulation will have 24 values
-set.seed(24) # Seed is necessary for reproducibility 
-sigma_num <- 8
-sigma <- c(1,2,4,6,8,12,16,24)
-
-y <- .4 * x_values + 10
-
-outputy<-as.data.frame(matrix(0, ncol=10, nrow=24))
-youtput <-list()
+outputy4 <-as.data.frame(matrix(0, ncol=10, nrow=24))
+youtput4 <-list()
 
 for (sigma_number in 1:sigma_num){
-  outputy = y + rnorm(length(y), mean=0, sd=sigma[sigma_number])
+  outputy4 = y4 + rnorm(length(y4), mean=0, sd=sigma[sigma_number])
   
-  youtput[[sigma_number]] <- outputy
+  youtput4[[sigma_number]] <- outputy4
 }
 
+## 8-level ANOVA ##
+x8 = c(5,5,5,10,10,10,15,15,15,20,20,20,25,25,25,30,30,30,35,35,35,40,40,40)
+x_values8 = matrix(rep(x8,10),nrow=24,ncol=10)
 
+y8 <- .4 * x_values8 + 10
 
-
-############# 8-level anova
-x = c(5,5,5,10,10,10,15,15,15,20,20,20,25,25,25,30,30,30,35,35,35,40,40,40)
-x_values = matrix(rep(x,10),nrow=24,ncol=10)
-num_sims <- 10 # Simulate the data 10 times 
-n_per_sim <- 24 # Each simulation will have 24 values
-set.seed(24) # Seed is necessary for reproducibility 
-sigma_num <- 8
-sigma <- c(1,2,4,6,8,12,16,24)
-
-y <- .4 * x_values + 10
-
-outputy<-as.data.frame(matrix(0, ncol=10, nrow=24))
-youtput <-list()
+outputy8 <-as.data.frame(matrix(0, ncol=10, nrow=24))
+youtput8 <-list()
 
 for (sigma_number in 1:sigma_num){
-  outputy = y + rnorm(length(y), mean=0, sd=sigma[sigma_number])
+  outputy8 = y8 + rnorm(length(y8), mean=0, sd=sigma[sigma_number])
   
-  youtput[[sigma_number]] <- outputy
+  youtput8[[sigma_number]] <- outputy8
 }
-
-
 
 ```
 
