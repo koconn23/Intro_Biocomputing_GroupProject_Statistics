@@ -125,15 +125,18 @@ results
 ```
 ##### All of the antibiotic treatments have a significant effect on growth because the chi squared values are all less than 0.05!
 
+
 ### Question 2: Evaluating the effect of sugar concentration on growth of E. coli in lab cultures.
 
+##### Let's visualize the data using ggplot. Since the data is continuous we use a linear plot. We can also add the linear equation and R^2^ value to the graph to tell us more about the data.
 ```{r}
 #### Linear plot of sugar effects on growth with line equation and R2 ####
 
 library(ggplot2)
 
-sugardata <- read.csv(file = "sugar.csv", header=TRUE)
+sugardata <- read.csv(file = "sugar.csv", header=TRUE) # Importing the data
 
+# Graphing the data
 plot2 <- ggplot(data = sugardata, aes(x = sugar, y = growth))+
   geom_point(color = "blue1", shape = 16, size = 2) +
   theme_classic() +
@@ -143,6 +146,8 @@ plot2 <- ggplot(data = sugardata, aes(x = sugar, y = growth))+
   stat_smooth(method = "lm", se=FALSE, color="black") + #Adds a trend line, se=FALSE gets rid of cloud around trendline.
   geom_text(aes(x = 5, y = 25, label = lm_eqn1(lm(sugar ~ growth, sugardata))), parse = TRUE) # Adds the values for the R2 value and equation of the trendline to the coordinates x and y
 
+
+# Adding the trendline, equation, and R2 value to the graph
 m= lm(sugar ~ growth, sugardata)
 
 lm_eqn1 = function(m) {       #Function to calculate and add R2 value and equation of the trendline to plot
@@ -164,14 +169,12 @@ plot2
 
 ```
 
-#### Next, we need test for an effect of sugar concentration on growth of E. coli using a regression-design linear model and likelihood ratio test. (11/29/17)
+#### Next, we need to test for an effect of sugar concentration on growth of E. coli using a regression-design linear model and likelihood ratio test.
+
+Our null hypothesis is that the growth of the E. coli is the same regardless of the sugar concentration.
 
 ```{r}
-
-#### Likelihood ratio test
-
 ############## Null model
-# Null hypothesis = the growth of E. coli is the same regardless of the sugar concentration
 
 nllnull = function(p,y){
   B0=p[1]
@@ -183,11 +186,13 @@ nllnull = function(p,y){
 
 initialGuess = c(5,1)
 null = optim(par=initialGuess,fn=nllnull,y=sugardata$growth)
-print(null)
 
+```
 
+Our alternative hypothesis is that the growth of the E. coli is dependent on the sugar concentration.
+
+```{r}
 ################ Linear Model
-# Alternative hypothesis = the growth of E. coli is dependent on the sugar concentration
 
 nllike_linear=function(p,x,y){
   B0=p[1]
@@ -203,54 +208,67 @@ nllike_linear=function(p,x,y){
 initialGuess=c(5,1,1)
 fit_linear=optim(par=initialGuess,fn=nllike_linear,x=sugardata$sugar,y=sugardata$growth)
 
-print(fit_linear)
+```
 
+Next, we coducted a likelihood ratio test to determine which model fit the data better.
+
+```{r}
 
 ############# likelihood ratio test
 q = 2*(null$value-fit_linear$value)
 lrt = pchisq(q=q, df=1, lower.tail=FALSE)
 print(lrt)
-
-# Becuase the p-value is less than 0.05 (2.64e-10), this means that we can reject the null hypothesis and conclude that there is a significant effect of sugar concentration on E. coli growth
-
 ```
 
-### Statistical_Power_Analysis
+Becuase the p-value is less than 0.05 (2.64e-10), this means that we can reject the null hypothesis and conclude that there is a significant effect of sugar concentration on E. coli growth
+
+
+
+### Statistical Power Analysis
+
+## Regression-designed Experiment
+
+First, we randomly selected 24 x-values between 0-50 and calculated the corresponding y-values based on a linear equation. We ran 10 monte carlos of this data. We then added noise to the data with 8 sigma values between 1 and 24.
 
 ```{r}
 size = 24 # Creates a random generation of 24 x-values between 0 and 50 
-  outputx[,sim_number] #### A statistical power analysis ####
 
 num_sims <- 10 # Simulate the data 10 times 
 n_per_sim <- 24 # Each simulation will have 24 values
 set.seed(24) # Seed is necessary for reproducibility 
 sigma_num <- 8 # The amount of sigma values for this analysis
-sigma <- c(1,2,4,6,8,12,16,24) ###### DO WE USE THIS FOR THIS FIRST PART OF THE CODE? I just wanted to make sure before I deleted it ######
+sigma <- c(1,2,4,6,8,12,16,24) # Setting the sigma values for this analysis
 
 outputx<-as.data.frame(matrix(0, ncol=10, nrow=24)) # Empty matrix to compile the 10 reiterations of the 24 randomly generated x variables
-outputy<-as.data.frame(matrix(0, ncol=10, nrow=24)) # Empty matrix to compile the 10 reiterations of the 24 randomly generated y variables
+outputy<-as.data.frame(matrix(0, ncol=10, nrow=24)) # Empty matrix to compile the 10 reiterations of the 24 y variables
 youtput <-list() # Empty file to compile the output matrices into a list
 
+###### For loop to randomly generate x-values and then corresponding y-values based on the provided slope and intercept
+
 for (sim_number in 1:num_sims){ # This starts your for loop
-  x = sample(x = 0:50, size = 24) 
+  x = sample(x = 0:50, size = 24) # 24 randomly generates x-values between 0 and 50
   outputx[,sim_number] <- x # Puts the randomly generated x-values with 10 iterations into empty matrix created before the for-loop 
   m <- 0.4 # Given slope value
   b <- 10 # Given y-intercept
   y = m*x + b # Calculates y-values from the 24 randomly generated x-values using given slope and intercept 
-  outputy[,sim_number] <- y # Puts the randomly generated y-values with 10 iterations into empty matrix created before the for-loop 
+  outputy[,sim_number] <- y # Puts the y-values with 10 iterations into empty matrix created before the for-loop 
 }
 
+###### For loop to add noise to the y-values based on the sigma values given
+
   for (sigma_number in 1:sigma_num){
-   outputy[,sim_number] = outputy[,sim_number]+rnorm(length(outputy[,sim_number]), mean=0, sd=sigma[sigma_number])
-   youtput[[sigma_number]] <- outputy
+  youtput[[sigma_number]] = outputy + rnorm(length(outputy), mean=0, sd=sigma[sigma_number])
   }
+```
 
-nllresults <- list()
+Next, we ran our data through a null model.
 
-value.mat <- matrix(NA,8,10)
-par.mat <- array(NA,dim = c(2,8,10))
+```{r}
 
-par.mat[,1,1]
+#Null model function
+
+null.value.mat <- matrix(NA,8,10)
+null.par.mat <- array(NA,dim = c(2,8,10))
 
 nllnull <- function(p,y){
   B0=p[1]
@@ -261,27 +279,27 @@ nllnull <- function(p,y){
 }
 
 for(sigma_number in 1:8){
-  #for(n_per_sim in 1:24){
     for(num_sims in 1:10){
+        initialGuess = rnorm(2,10)
+        null = optim(par=initialGuess,fn=nllnull,
+                     y=as.matrix(youtput[[sigma_number]][,num_sims]))
 
-#Null model function
+        null.value.mat[sigma_number,num_sims] <- null$value
 
-initialGuess = c(1,1)
-null = optim(par=initialGuess,fn=nllnull,y=as.matrix(youtput[[sigma_number]][,num_sims]))
-#nllresults[[num_sims]]  <- null
-#print(nllresults)
-
-value.mat[sigma_number,num_sims] <- null$value
-
-par.mat[,sigma_number,num_sims] <- null$par
-
+        null.par.mat[,sigma_number,num_sims] <- null$par
     }
-  #}
 }
+```
 
-lapply(nllresults,x$par)
+Then, we ran our data through a linear model.
+
+```{r}
 
 #Linear Model function
+
+linear.value.mat <- matrix(NA,8,10)
+linear.par.mat <- array(NA,dim = c(3,8,10))
+
 nlllinear <- function(p,x,y){
   B0=p[1]
   B1=p[2]
@@ -291,22 +309,234 @@ nlllinear <- function(p,x,y){
   return(nll)
 }
 
-#### ANOVA ####
+for(sigma_number in 1:8){
+    for(num_sims in 1:10){
+        initialGuess = rnorm(3,10,2)
+        linear = optim(par=initialGuess,fn=nlllinear, x=as.matrix(outputx),
+                     y=as.matrix(youtput[[sigma_number]][,num_sims]))
 
+        linear.value.mat[sigma_number,num_sims] <- linear$value
+
+        linear.par.mat[,sigma_number,num_sims] <- linear$par
+    }
+}
+```
+
+We then performed a likelihood ratio test to determine if there was a significant difference in the fit between our null and linear models.
+
+```{r}
+####### Likelihood ratio test
+
+lrt.value <- matrix(NA,8,10) # Empty matrix to store the p-values
+
+for(sigma_number in 1:8){ # Start of for loop 1
+    for(num_sims in 1:10){ # Start of for loop 2
+      
+      q = 2*(linear.value.mat[sigma_number,num_sims]-null.value.mat[sigma_number,num_sims]) # Calculating the q-value for each cell - subtracting the linear value from the null value and multiplying by 2
+      lrt = pchisq(q=q, df=1, lower.tail=FALSE) # Conducting the likelihood ratio test
+      lrt.value[sigma_number,num_sims] <- lrt # Storing the outputs from the likelihood ratio test in the matrix that was created earlier
+    }
+  }
+
+# Average p-value across monte carlos
+for (num_sims in 1:10){
+  print(mean(lrt.value[,num_sims]))
+}
+```
+Because the average p-value across all sigma values is less than 0.05, we can reject the null model.
+
+
+
+## ANOVA-designed Experiment
+
+# 2-level ANOVA
+
+First we set our two experimental trials to be 12 replicates at an x-value of 13 and 12 replicates at an x-value of 38. We then calculated our y-values from a linear equation and added some noise to the data with 8 sigma values between 1 and 24.
+
+```{r}
 ## 2-level ANOVA ##
 x2 = c(13,13,13,13,13,13,13,13,13,13,13,13,38,38,38,38,38,38,38,38,38,38,38,38)
 x_values2 = matrix(rep(x2,10),nrow=24,ncol=10)
 
-y2 <- .4 * x_values2 + 10
+y2 <-  .4 * x_values2^2 + 10
 
 outputy2 <-as.data.frame(matrix(0, ncol=10, nrow=24))
 youtput2 <-list()
 
-  for (sigma_number in 1:sigma_num){
-    outputy2 = y2 + rnorm(length(y2), mean=0, sd=sigma[sigma_number])
+for (sigma_number in 1:sigma_num){
+  outputy2 = y2 + rnorm(length(y2), mean=0, sd=sigma[sigma_number])
     
-    youtput2[[sigma_number]] <- outputy2
+  youtput2[[sigma_number]] <- outputy2
+}
+```
+
+We then subset the data and ran each subset of data through the null and linear model.
+
+```{r}
+
+# Subsetting the data by x-value/trial
+youtput2.1 = lapply(youtput2, function(x) x[1:12,,drop=FALSE])
+youtput2.2 = lapply(youtput2, function(x) x[13:24,,drop=FALSE])
+
+# Output matrices/arrays for null model values
+A2.1.null.value.mat <- matrix(NA,8,10)
+A2.1.null.par.mat <- array(NA,dim = c(2,8,10))
+A2.2.null.value.mat <- matrix(NA,8,10)
+A2.2.null.par.mat <- array(NA,dim = c(2,8,10))
+
+# Null function
+nllnull <- function(p,y){
+  B0=p[1]
+  sig=exp(p[2])
+  expected=B0
+  nll=-sum(dnorm(x=y, mean=expected, sd=sig,log=TRUE))
+  return(nll)
+}
+
+# Linear function
+nlllinear <- function(p,x,y){
+  B0=p[1]
+  B1=p[2]
+  sig=exp(p[3])
+  expected=B0+B1*x
+  nll=-sum(dnorm(x=y, mean=expected, sd=sig,log=TRUE))
+  return(nll)
+}
+
+### Null model for rows 1-12 (test value = 13)
+for(sigma_number in 1:8){
+    for(num_sims in 1:10){
+        initialGuess = rnorm(2,-10)
+        null = optim(par=initialGuess,fn=nllnull,
+                     y=as.matrix(youtput2.1[[sigma_number]][,num_sims]))
+
+        A2.1.null.value.mat[sigma_number,num_sims] <- null$value
+
+        A2.1.null.par.mat[,sigma_number,num_sims] <- null$par
+    }
+}
+
+### Null model For rows 13-24 (test value = 38)
+for(sigma_number in 1:8){
+    for(num_sims in 1:10){
+        initialGuess = rnorm(2,-10)
+        null = optim(par=initialGuess,fn=nllnull,
+                     y=as.matrix(youtput2.2[[sigma_number]][,num_sims]))
+
+        A2.2.null.value.mat[sigma_number,num_sims] <- null$value
+
+        A2.2.null.par.mat[,sigma_number,num_sims] <- null$par
+    }
+}
+
+# Output matrices/arrays for linear model values
+A2.1.linear.value.mat <- matrix(NA,8,10)
+A2.1.linear.par.mat <- array(NA,dim = c(3,8,10))
+A2.2.linear.value.mat <- matrix(NA,8,10)
+A2.2.linear.par.mat <- array(NA,dim = c(3,8,10))
+
+### Linear model for rows 1-12 (test value = 13)
+for(sigma_number in 1:8){
+    for(num_sims in 1:10){
+        initialGuess = rnorm(3,10,2)
+        linear = optim(par=initialGuess,fn=nlllinear, x=as.matrix(x_values2),
+                     y=as.matrix(youtput2.1[[sigma_number]][,num_sims]))
+
+        A2.1.linear.value.mat[sigma_number,num_sims] <- linear$value
+
+        A2.1.linear.par.mat[,sigma_number,num_sims] <- linear$par
+    }
+}
+
+### Linear model for rows 13-24 (test value = 38)
+for(sigma_number in 1:8){
+    for(num_sims in 1:10){
+        initialGuess = rnorm(3,10,2)
+        linear = optim(par=initialGuess,fn=nlllinear, x=as.matrix(x_values2),
+                     y=as.matrix(youtput2.1[[sigma_number]][,num_sims]))
+
+        A2.2.linear.value.mat[sigma_number,num_sims] <- linear$value
+
+        A2.2.linear.par.mat[,sigma_number,num_sims] <- linear$par
+    }
+}
+```
+
+We then conducted a likelihood ratio test between the null and linear model for our first x-value (13).
+
+```{r}
+#### Likelihood Ratio Tests
+
+#### Test value = 13 (null vs linear model)
+lrt.value.13 <- matrix(NA,8,10) # Empty matrix to store the p-values
+
+for(sigma_number in 1:8){ # Start of for loop 1
+    for(num_sims in 1:10){ # Start of for loop 2
+      
+      q = 2*(A2.1.linear.value.mat[sigma_number,num_sims]-A2.1.null.value.mat[sigma_number,num_sims]) # Calculating the q-value for each cell - subtracting the linear value from the null value and multiplying by 2
+      lrt = pchisq(q=q, df=1, lower.tail=FALSE) # Conducting the likelihood ratio test
+      lrt.value.13[sigma_number,num_sims] <- lrt # Storing the outputs from the likelihood ratio test in the matrix that was created earlier
+    }
   }
+
+# Average p-value across monte carlos
+for (num_sims in 1:10){
+  print(mean(lrt.value.13[,num_sims]))
+}
+```
+Because all p-values are smaller than 0.05 we can reject the null model.
+
+We then conducted a likelihood ratio test between the null and linear model for our second x-value (38).
+
+```{r}
+
+#### Test value = 38
+lrt.value.38 <- matrix(NA,8,10) # Empty matrix to store the p-values
+
+for(sigma_number in 1:8){ # Start of for loop 1
+    for(num_sims in 1:10){ # Start of for loop 2
+      
+      q = 2*(A2.2.linear.value.mat[sigma_number,num_sims]-A2.2.null.value.mat[sigma_number,num_sims]) # Calculating the q-value for each cell - subtracting the linear value from the null value and multiplying by 2
+      lrt = pchisq(q=q, df=1, lower.tail=FALSE) # Conducting the likelihood ratio test
+      lrt.value.38[sigma_number,num_sims] <- lrt # Storing the outputs from the likelihood ratio test in the matrix that was created earlier
+    }
+  }
+
+# Average p-value across monte carlos
+for (num_sims in 1:10){
+  print(mean(lrt.value.38[,num_sims]))
+}
+```
+Because all p-values are smaller than 0.05 we can reject the null model.
+
+We then conducted a likelihood ratio test between the linear model of our two x-values (13 and 38) to determine if there was a significant differnece between the two treatments.
+
+```{r}
+#### Comparing the two trial values (13 vs 38)
+lrt.value.A2 <- matrix(NA,8,10) # Empty matrix to store the p-values
+
+for(sigma_number in 1:8){ # Start of for loop 1
+    for(num_sims in 1:10){ # Start of for loop 2
+      
+      q = -2*(A2.2.linear.value.mat[sigma_number,num_sims]-A2.1.linear.value.mat[sigma_number,num_sims]) # Calculating the q-value for each cell - subtracting the linear value from the null value and multiplying by 2
+      lrt = pchisq(q=q, df=1, lower.tail=FALSE) # Conducting the likelihood ratio test
+      lrt.value.A2[sigma_number,num_sims] <- lrt # Storing the outputs from the likelihood ratio test in the matrix that was created earlier
+    }
+  }
+
+# Average p-value across monte carlos
+for (num_sims in 1:10){
+  print(mean(lrt.value.A2[,num_sims]))
+}
+```
+Because the p-values are all greater than 0.05 we cannot reject the null model.
+
+
+# 4-level ANOVA
+
+First we set our four experimental trials to be 10, 20, 30, and 40. Each trial was replicated six times for each monte carlo replicate. We then calculated our y-values from a linear equation and added some noise to the data with 8 sigma values between 1 and 24.
+
+```{r}
 
 ## 4-level ANOVA ##
 x4 = c(10,10,10,10,10,10,20,20,20,20,20,20,30,30,30,30,30,30,40,40,40,40,40,40)
@@ -323,7 +553,13 @@ for (sigma_number in 1:sigma_num){
   
   youtput4[[sigma_number]] <- outputy4
 }
+```
 
+# 8-level ANOVA
+
+First we set our eight experimental trials to be 5, 10, 15, 20, 25, 30, 35, 40. Each trial was replicated three times for each monte carlo replicate. We then calculated our y-values from a linear equation and added some noise to the data with 8 sigma values between 1 and 24.
+
+```{r}
 ## 8-level ANOVA ##
 x8 = c(5,5,5,10,10,10,15,15,15,20,20,20,25,25,25,30,30,30,35,35,35,40,40,40)
 x_values8 = matrix(rep(x8,10),nrow=24,ncol=10)
