@@ -242,6 +242,9 @@ sigma <- c(1,2,4,6,8,12,16,24) # Setting the sigma values for this analysis
 outputx<-as.data.frame(matrix(0, ncol=10, nrow=24)) # Empty matrix to compile the 10 reiterations of the 24 randomly generated x variables
 outputy<-as.data.frame(matrix(0, ncol=10, nrow=24)) # Empty matrix to compile the 10 reiterations of the 24 y variables
 youtput <-list() # Empty file to compile the output matrices into a list
+for(sigma_number in 1:sigma_num){
+  youtput[[sigma_number]]=matrix(NA,24,num_sims)
+}
 
 ###### For loop to randomly generate x-values and then corresponding y-values based on the provided slope and intercept
 
@@ -257,7 +260,9 @@ for (sim_number in 1:num_sims){ # This starts your for loop
 ###### For loop to add noise to the y-values based on the sigma values given
 
   for (sigma_number in 1:sigma_num){
-  youtput[[sigma_number]] = outputy + rnorm(length(outputy), mean=0, sd=sigma[sigma_number])
+    for (j in 1:10){
+  youtput[[sigma_number]][,j] = outputy[,j] + rnorm(nrow(outputy), mean=0, sd=sigma[sigma_number])
+    }
   }
 ```
 
@@ -280,7 +285,7 @@ nllnull <- function(p,y){
 
 for(sigma_number in 1:8){
     for(num_sims in 1:10){
-        initialGuess = rnorm(2,10)
+        initialGuess = c(2,10)
         null = optim(par=initialGuess,fn=nllnull,
                      y=as.matrix(youtput[[sigma_number]][,num_sims]))
 
@@ -311,8 +316,8 @@ nlllinear <- function(p,x,y){
 
 for(sigma_number in 1:8){
     for(num_sims in 1:10){
-        initialGuess = rnorm(3,10,2)
-        linear = optim(par=initialGuess,fn=nlllinear, x=as.matrix(outputx),
+        initialGuess = c(0,0.3,2)
+        linear = optim(par=initialGuess,fn=nlllinear, x=as.matrix(outputx[,num_sims]),
                      y=as.matrix(youtput[[sigma_number]][,num_sims]))
 
         linear.value.mat[sigma_number,num_sims] <- linear$value
@@ -332,15 +337,15 @@ lrt.value <- matrix(NA,8,10) # Empty matrix to store the p-values
 for(sigma_number in 1:8){ # Start of for loop 1
     for(num_sims in 1:10){ # Start of for loop 2
       
-      q = 2*(linear.value.mat[sigma_number,num_sims]-null.value.mat[sigma_number,num_sims]) # Calculating the q-value for each cell - subtracting the linear value from the null value and multiplying by 2
+      q = 2*(null.value.mat[sigma_number,num_sims]-linear.value.mat[sigma_number,num_sims]) # Calculating the q-value for each cell - subtracting the linear value from the null value and multiplying by 2
       lrt = pchisq(q=q, df=1, lower.tail=FALSE) # Conducting the likelihood ratio test
       lrt.value[sigma_number,num_sims] <- lrt # Storing the outputs from the likelihood ratio test in the matrix that was created earlier
     }
   }
 
 # Average p-value across monte carlos
-for (num_sims in 1:10){
-  print(mean(lrt.value[,num_sims]))
+for (sigma_number in 1:8){
+  print(mean(lrt.value[sigma_number,]))
 }
 ```
 Because the average p-value across all sigma values is less than 0.05, we can reject the null model.
