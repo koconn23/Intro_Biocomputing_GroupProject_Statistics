@@ -42,11 +42,14 @@ for (i in 1:nrow(antibiotics)){
 
 ##### Next we need to subset the data into matrices that contain only the control data and one of the antibiotic treatments
 + These matrices are labeled ab1, ab2, and ab3 for the different types of antibiotics
++ For each matrix we add the control data and then below that we add the data for each antibiotic so that we can make comparisons between the control and antibiotic 1, 2, and 3
 ```{r}
 ab1 <- antibiotics[antibiotics$trt == 'control',]
 ab1[5:8,] <- antibiotics[antibiotics$trt == 'ab1',]
+
 ab2 <- antibiotics[antibiotics$trt == 'control',]
 ab2[5:8,] <- antibiotics[antibiotics$trt == 'ab2',]
+
 ab3 <- antibiotics[antibiotics$trt == 'control',]
 ab3[5:8,] <- antibiotics[antibiotics$trt == 'ab3',]
 ```
