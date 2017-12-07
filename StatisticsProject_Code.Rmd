@@ -129,7 +129,7 @@ results
 ##### All of the antibiotic treatments have a significant effect on growth because the chi squared values are all less than 0.05!
 
 
-## Question 2: Evaluating the effect of sugar concentration on growth of E. coli in lab cultures.
+## Question 2: Evaluating the effect of sugar concentration on growth of E. coli in lab cultures
 
 ##### Let's visualize the data using ggplot. Since the data is continuous we use a linear plot. We can also add the linear equation and R^2^ value to the graph to tell us more about the data.
 ```{r}
@@ -211,7 +211,7 @@ fit_linear=optim(par=initialGuess,fn=nllike_linear,x=sugardata$sugar,y=sugardata
 
 ```
 
-##### Next, we coducted a likelihood ratio test to determine which model fit the data better.
+##### Next, we conducted a likelihood ratio test to determine which model fit the data better.
 
 ```{r}
 
@@ -557,7 +557,7 @@ nllnull <- function(p,y){
 }
 
 # Linear function
-nlllinear <- function(p,x,y){
+nlllinear <- function(p,xoutput4,y){
   B0=p[1]
   B1=p[2]
   B2=p[3]
@@ -586,17 +586,17 @@ for(sigma_number in 1:8){ # Looping through each sheet in the list (each sigma v
     }
 }
 
-### Running the linear model
+### Running the linear model    
 for(sigma_number in 1:8){ # Looping through each sheet in the list (each sigma value)
     for(num_sims in 1:10){ # Looping through each column in each sheet (each monte carlo)
-        initialGuess = c(0,0,0,0,2) # Initial Guess
-        linear = optim(par=initialGuess,fn=nlllinear, x=as.matrix(xoutput4[,num_sims]),
+        initialGuess = c(15,4,8,12,1) # Initial Guess
+        linear = optim(par=initialGuess,fn=nlllinear, x=as.matrix(xoutput4),
                      y=as.matrix(youtput4[[sigma_number]][,num_sims])) # Optimizing the model
 
         A4.linear.value.mat[sigma_number,num_sims] <- linear$value # Storing the value outputs into a matrix
         A4.linear.par.mat[,sigma_number,num_sims] <- linear$par # Storing the parameter outputs into an array
     }
-}
+   }
 
 ```
 
@@ -620,6 +620,7 @@ for (sigma_number in 1:8){
   print(mean(lrt.value.A4[sigma_number,]))
 }
 ```
+##### The p-values are significnat until we get to the sixth sigma value (sigma=12).
 
 
 ### 8-level ANOVA
@@ -690,7 +691,7 @@ nllnull <- function(p,y){
 }
 
 # Linear function
-nlllinear <- function(p,x,y){
+nlllinear <- function(p,xoutput8,y){
   B0=p[1]
   B1=p[2]
   B2=p[3]
@@ -726,8 +727,8 @@ for(sigma_number in 1:8){ # Loops through each sheet in the list (each sigma val
 ### Running the linear model
 for(sigma_number in 1:8){ # Loops through each sheet in the list (each sigma value)
     for(num_sims in 1:10){ # Loops through each column in each sheet (each monte carlo)
-        initialGuess = c(0,0,0,0,0,0,0,0,2) # Initial guess
-        linear = optim(par=initialGuess,fn=nlllinear, x=as.matrix(xoutput8[,num_sims]),
+        initialGuess = c(15,4,6,8,10,12,14,16,1) # Initial guess
+        linear = optim(par=initialGuess,fn=nlllinear, x=as.matrix(xoutput8),
                      y=as.matrix(youtput8[[sigma_number]][,num_sims])) # Optimizing the model
 
         A8.linear.value.mat[sigma_number,num_sims] <- linear$value # Storing the value outputs into the matrix
@@ -745,7 +746,7 @@ lrt.value.A8 <- matrix(NA,8,10) # Empty matrix to store the p-values
 for(sigma_number in 1:8){ # Start of for loop 1
     for(num_sims in 1:10){ # Start of for loop 2
       
-      q = -2*(A8.null.value.mat[sigma_number,num_sims]-A8.linear.value.mat[sigma_number,num_sims]) # Calculating the q-value for each cell - subtracting the null value from the linear value and multiplying by 2
+      q = 2*(A8.null.value.mat[sigma_number,num_sims]-A8.linear.value.mat[sigma_number,num_sims]) # Calculating the q-value for each cell - subtracting the null value from the linear value and multiplying by 2
       lrt = pchisq(q=q, df=7, lower.tail=FALSE) # Conducting the likelihood ratio test
       lrt.value.A8[sigma_number,num_sims] <- lrt # Storing the outputs from the likelihood ratio test in the matrix that was created earlier
     }
@@ -756,6 +757,46 @@ for (sigma_number in 1:8){
   print(mean(lrt.value.A8[sigma_number,]))
 }
 ```
+##### The p-values are significnat until we get to the fourth sigma value (sigma=6).
+
+
+### Assessing the ANOVA-vs regression-design performance
+
+##### As a reminder, here are the average p-values across the monte carlos for each sigma value for each of our 4 tests.
+
+##### Regression-design
+```{r}
+for (sigma_number in 1:8){
+  print(mean(lrt.value[sigma_number,]))
+}
+```
+
+##### 2-level ANOVA
+```{r}
+for (sigma_number in 1:8){
+  print(mean(lrt.value.A2[sigma_number,]))
+}
+```
+
+##### 4-level ANOVA
+```{r}
+for (sigma_number in 1:8){
+  print(mean(lrt.value.A4[sigma_number,]))
+}
+```
+
+##### 8-level ANOVA
+```{r}
+for (sigma_number in 1:8){
+  print(mean(lrt.value.A8[sigma_number,]))
+}
+```
+
+##### Overall, the regression-design performs better than the 2-level, 4-level and 8-level ANOVA-designs; we can conclude this by looking at the corresponding p-values bewteen the four different designs.
+
+##### Additionally, as the number of levels in the ANOVA increased, the statistical power decreased (i.e. the 2-level performed better than the 4-level, which performed better than the 8-level). A likely explanation for this is the difference in the sample size across the different designs. Because the number of observations for each trial was held constant at 24, this meant that as the number of levels in the ANOVA-design increased, the sample size decreased for each treatment.
+
+
 
 
 
