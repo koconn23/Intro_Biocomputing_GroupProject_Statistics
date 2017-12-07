@@ -24,40 +24,23 @@ plot1
 
 ```
 
-#### Next, we need to look at antibiotic treatments on the growth of E. coli using an ANOVA-design linear model and likelihood ratio test. (11/29/17)
-##### To do this we first need to assign a value to the absence of antibiotic treatment and the presence of antibiotic treament
-+ The easiest way to do this is with a for-loop that assigns a zero to the control treatment, and a one to any of the antibiotic treatments
-+ The for-loop below adds a column to the antibiotics dataset called 'aborct' entering zeros and ones to antibiotic treatment or no antibiotic treatment
+#### Next, we need to look at antibiotic treatments on the growth of E. coli using an ANOVA-design linear model and likelihood ratio test.
+##### To do this we first need to assign a value to the effect of each antibiotic treatment
++ The easiest way to do this is with a matrix that assigns zeros to the control treatment, 1s to one of the antibiotic treatments, and zeros to the remaining antibiotic treatments
++ The matrix is compiled from three vectors, ab1 has antibiotic 1 having an effect, ab2 has antibiotic 2 having an effect, and ab3 has antibiotic 3 having an effect
 
 ```{r}
-for (i in 1:nrow(antibiotics)){
-  if (antibiotics$trt[i] == 'control'){
-    antibiotics$aborct[i] <- 0
-  }
-  else{
-    antibiotics$aborct[i] <- 1
-  }
-}
-```
-
-##### Next we need to subset the data into matrices that contain only the control data and one of the antibiotic treatments
-+ These matrices are labeled ab1, ab2, and ab3 for the different types of antibiotics
-+ For each matrix we add the control data and then below that we add the data for each antibiotic so that we can make comparisons between the control and antibiotic 1, 2, and 3
-```{r}
-ab1 <- antibiotics[antibiotics$trt == 'control',]
-ab1[5:8,] <- antibiotics[antibiotics$trt == 'ab1',]
-
-ab2 <- antibiotics[antibiotics$trt == 'control',]
-ab2[5:8,] <- antibiotics[antibiotics$trt == 'ab2',]
-
-ab3 <- antibiotics[antibiotics$trt == 'control',]
-ab3[5:8,] <- antibiotics[antibiotics$trt == 'ab3',]
+ab1 <- c(0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0)
+ab2 <- c(0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0)
+ab3 <- c(0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1)
+xvalues <- matrix(c(ab1,ab2,ab3),nrow=length(ab1),ncol=3)
+xvalues
 ```
 
 ##### It's easiest to keep our results of the negative log likelihood models and the likelihood ratio test organized if we create a matrix that holds all the results
 + Below we create a matrix where column 1 holds the results of the null model, column 2 holds the results of the linear model, and column 3 holds the results of the likelihood ratio test
 ```{r}
-results <- matrix(0,3,3)
+results <- matrix(0,1,3)
 colnames(results) <- c("null", "linear", "chisq")
 ```
 
@@ -78,55 +61,46 @@ nllnull <- function(p,y){
 nlllinear <- function(p,x,y){
   B0=p[1]
   B1=p[2]
-  sig=exp(p[3])
-  expected=B0+B1*x
+  B2=p[3]
+  B3=p[4]
+  sig=exp(p[5])
+  expected=B0+B1*x[,1]+B2*x[,2]+B3*x[,3]
   nll=-sum(dnorm(x=y, mean=expected, sd=sig,log=TRUE))
   return(nll)
 }
 ```
 
 ##### We are ready to run the null and linear negative log likelihood models for the three different antibiotic treatments and store them in our results table
+##### For the initial guesses in the optim function I found the means of each antibiotic treatment and the control to make them closer to the actual
 ```{r}
-# Antibiotic 1 null model and linear model results
-initialGuess <- c(1,1)
-fit <- optim(par=initialGuess,fn=nllnull,y=ab1$growth)
+# I found the mean of each antibiotic and the controls to make the intial guesses closer
+mean(antibiotics$growth[antibiotics$trt=='control'])
+mean(antibiotics$growth[antibiotics$trt=='ab1'])
+mean(antibiotics$growth[antibiotics$trt=='ab2'])
+mean(antibiotics$growth[antibiotics$trt=='ab3'])
+```
+
+##### Now we run the models, the null model only has to be run once and the linear model has to be run three times with each antibiotic having an effect each run
+```{r}
+# Antibiotic null model
+initialGuess <- c(20,1)
+fit <- optim(par=initialGuess,fn=nllnull,y=antibiotics$growth)
 results[1,1] <- fit$value
 
-initialGuess <- c(1,1,1)
-fit <- optim(par=initialGuess,fn=nlllinear,x=ab1$aborct,y=ab1$growth)
+# Antibiotic linear model results 
+initialGuess <- c(20,4,17,8,1)
+fit <- optim(par=initialGuess,fn=nlllinear,x=xvalues,y=antibiotics$growth)
 results[1,2] <- fit$value
-
-# Antibiotic 2 null model and linear model results 
-initialGuess <- c(1,1)
-fit <- optim(par=initialGuess,fn=nllnull,y=ab2$growth)
-results[2,1] <- fit$value
-
-initialGuess <- c(1,1,1)
-fit <- optim(par=initialGuess,fn=nlllinear,x=ab2$aborct,y=ab2$growth)
-results[2,2] <- fit$value
-
-# Antibiotic 3 null model and linear model results
-initialGuess <- c(1,1)
-fit <- optim(par=initialGuess,fn=nllnull,y=ab3$growth)
-results[3,1] <- fit$value
-
-initialGuess <- c(1,1,1)
-fit <- optim(par=initialGuess,fn=nlllinear,x=ab3$aborct,y=ab3$growth)
-results[3,2] <- fit$value
 ```
 
 ##### Finally we calculate the likelihood ratio test and store the results in our results table
 ```{r}
 #likelihood ratio test results
 A <- 2*(results[1,1]-results[1,2])
-B <- 2*(results[2,1]-results[2,2])
-C <- 2*(results[3,1]-results[3,2])
 results[1,3] <- pchisq(q=A, df=1, lower.tail=FALSE) 
-results[2,3] <- pchisq(q=B, df=1, lower.tail=FALSE) 
-results[3,3] <- pchisq(q=C, df=1, lower.tail=FALSE)
 results
 ```
-##### All of the antibiotic treatments have a significant effect on growth because the chi squared values are all less than 0.05!
+##### Antibiotic treatment has a significant effect on growth because the p-value is less than 0.05 so we can reject the null model.
 
 
 ## Question 2: Evaluating the effect of sugar concentration on growth of E. coli in lab cultures
@@ -271,7 +245,7 @@ for (sim_number in 1:num_sims){
 
 ```{r}
 
-#Linear Model function
+#Null Model function
 
 null.value.mat <- matrix(NA,8,10) # Empty matrix to store the value outputs from each model run
 null.par.mat <- array(NA,dim = c(2,8,10)) # Empty matrix to store the paramter outputs from each model run
