@@ -3,8 +3,9 @@
 # Import the data set
 antibiotics <- read.csv("antibiotics.csv")
 
-# Since we're testing the difference between the influence of each individual antibiotic
-# 
+# Since we're testing the difference between the influence of each individual antibiotic,
+# we add these columns to our antibiotics data set to show the influence of ab1, 2, or 3 indicated with a 1
+# while the rest of the antibiotics have a 0
 antibiotics$ab1 <- c(0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0)
 antibiotics$ab2 <- c(0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0)
 antibiotics$ab3 <- c(0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1)
@@ -42,6 +43,7 @@ fit <- optim(par=initialGuess,fn=nllnull,y=antibiotics$growth)
 results[1,1] <- fit$value
 results[2,1] <- fit$value
 results[3,1] <- fit$value
+# I put the same value in all three rows just to make the math easier at the end in the results table
 
 # Antibiotic 1 linear model results 
 initialGuess <- c(1,1,1,1,1)
