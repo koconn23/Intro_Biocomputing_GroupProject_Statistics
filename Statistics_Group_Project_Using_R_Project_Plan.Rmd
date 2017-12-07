@@ -15,9 +15,44 @@ output: html_document
 
 ### 11/29/2017:
 
-+ Start looking at antibiotic treatments on the growth of E. coli using an ANOVA-design linear model and likelihood ratio test.
++ Libby start working on antibiotic treatments on the growth of E. coli using an ANOVA-design linear model and likelihood ratio test (Question 1). Pseudo-code completed throughout.
 
-+ Start testing for an effect of sugar concentration on growth of E. coli using a regression-design linear model and likelihood ratio test.
++ Chelsea start working on effect of sugar concentration on growth of E. coli using a regression-design linear model and likelihood ratio test (Question 2). Pseudo-code completed throughout.
+
++ Keith start working on generating the x and y data for statistical power analysis. Pseudo-code completed throughout.
+
+### 12/1/2017
+
++ Keep working on questions above if need more time. 
+
++ Once finished, everyone help on data generation for power analysis, meet with Meredith for questions.
+
+### 12/4/2017
+
++ Once data is generated, write a for-loop to add the different standard deviations to the data. Psuedo-code throughout. 
+
++ Create plots to check that the spread was added to the data correctly (not included in final analysis).
+
++ Begin writing null, 2-level, 4-level, and 8-level anova models. Psuedo-code throughout. 
+
+### 12/6/2017
+
++ Peer review in class, address feedback. 
+
++ Meet with Stuart after class to clear up questions about ANOVA models. 
+
++ Rewrite question 1 to have corrected ANOVA model after talking with Stuart.
+
++ Finalize ANOVA models for statistical power analysis. 
+
+### 12/7/2017
+
++ Finalize code R-markdown file to have clear pseudocode and comments. 
+
++ Finalize plan R-markdown to be formatted correctly. 
+
++ Clean-up Github repo to only contain necessary files, add comments if necessary?
+
 
 
 
