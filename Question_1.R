@@ -6,10 +6,10 @@ antibiotics <- read.csv("antibiotics.csv")
 # Since we're testing the difference between the influence of each individual antibiotic,
 # we add these columns to our antibiotics data set to show the influence of ab1, 2, or 3 indicated with a 1
 # while the rest of the antibiotics have a 0
-antibiotics$ab1 <- c(0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0)
-antibiotics$ab2 <- c(0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0)
-antibiotics$ab3 <- c(0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1)
-
+ab1 <- c(0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0)
+ab2 <- c(0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0)
+ab3 <- c(0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1)
+xvalues <- matrix(c(ab1,ab2,ab3),nrow=length(ab1),ncol=3)
 
 # This is a matrix that will hold the negative log likelihood results of the null and linear models, and the
 # results of the likelihood ratio test
@@ -32,32 +32,38 @@ nlllinear <- function(p,x,y){
   B2=p[3]
   B3=p[4]
   sig=exp(p[5])
-  expected=B0+B1*x[5:8]+B2*x[9:12]+B3*x[13:16]
+  expected=B0+B1*x+B2*x+B3*x
   nll=-sum(dnorm(x=y, mean=expected, sd=sig,log=TRUE))
   return(nll)
 }
 
 # Antibiotic null model
-initialGuess <- c(1,1)
+initialGuess <- c(20,1)
 fit <- optim(par=initialGuess,fn=nllnull,y=antibiotics$growth)
 results[1,1] <- fit$value
 results[2,1] <- fit$value
 results[3,1] <- fit$value
-# I put the same value in all three rows just to make the math easier at the end in the results table
+# I put the same null value in all three rows just to make the math easier at the end in the results table
+
+# I found the mean of each antibiotic and the controls to make the intial guesses closer
+mean(antibiotics$growth[antibiotics$trt=='control'])
+mean(antibiotics$growth[antibiotics$trt=='ab1'])
+mean(antibiotics$growth[antibiotics$trt=='ab2'])
+mean(antibiotics$growth[antibiotics$trt=='ab3'])
 
 # Antibiotic 1 linear model results 
-initialGuess <- c(1,1,1,1,1)
-fit <- optim(par=initialGuess,fn=nlllinear,x=antibiotics$ab1,y=antibiotics$growth)
+initialGuess <- c(20,4,17,8,1)
+fit <- optim(par=initialGuess,fn=nlllinear,x=xvalues[,1],y=antibiotics$growth)
 results[1,2] <- fit$value
 
 # Antibiotic 2 linear model results 
-initialGuess <- c(1,1,1,1,1)
-fit <- optim(par=initialGuess,fn=nlllinear,x=antibiotics$ab2,y=antibiotics$growth)
+initialGuess <- c(20,4,17,8,1)
+fit <- optim(par=initialGuess,fn=nlllinear,x=xvalues[,2],y=antibiotics$growth)
 results[2,2] <- fit$value
 
 # Antibiotic 3 linear model results
-initialGuess <- c(1,1,1,1,1)
-fit <- optim(par=initialGuess,fn=nlllinear,x=antibiotics$ab3,y=antibiotics$growth)
+initialGuess <- c(20,4,17,8,1)
+fit <- optim(par=initialGuess,fn=nlllinear,x=xvalues[,3],y=antibiotics$growth)
 results[3,2] <- fit$value
 
 #likelihood ratio test results
