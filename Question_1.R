@@ -13,7 +13,7 @@ xvalues <- matrix(c(ab1,ab2,ab3),nrow=length(ab1),ncol=3)
 
 # This is a matrix that will hold the negative log likelihood results of the null and linear models, and the
 # results of the likelihood ratio test
-results <- matrix(0,3,3)
+results <- matrix(0,1,3)
 colnames(results) <- c("null", "linear", "chisq")
 
 #Null model function
@@ -32,18 +32,10 @@ nlllinear <- function(p,x,y){
   B2=p[3]
   B3=p[4]
   sig=exp(p[5])
-  expected=B0+B1*x+B2*x+B3*x
+  expected=B0+B1*x[,1]+B2*x[,2]+B3*x[,3]
   nll=-sum(dnorm(x=y, mean=expected, sd=sig,log=TRUE))
   return(nll)
 }
-
-# Antibiotic null model
-initialGuess <- c(20,1)
-fit <- optim(par=initialGuess,fn=nllnull,y=antibiotics$growth)
-results[1,1] <- fit$value
-results[2,1] <- fit$value
-results[3,1] <- fit$value
-# I put the same null value in all three rows just to make the math easier at the end in the results table
 
 # I found the mean of each antibiotic and the controls to make the intial guesses closer
 mean(antibiotics$growth[antibiotics$trt=='control'])
@@ -51,26 +43,17 @@ mean(antibiotics$growth[antibiotics$trt=='ab1'])
 mean(antibiotics$growth[antibiotics$trt=='ab2'])
 mean(antibiotics$growth[antibiotics$trt=='ab3'])
 
+# Antibiotic null model
+initialGuess <- c(20,1)
+fit <- optim(par=initialGuess,fn=nllnull,y=antibiotics$growth)
+results[1,1] <- fit$value
+
 # Antibiotic 1 linear model results 
 initialGuess <- c(20,4,17,8,1)
-fit <- optim(par=initialGuess,fn=nlllinear,x=xvalues[,1],y=antibiotics$growth)
+fit <- optim(par=initialGuess,fn=nlllinear,x=xvalues,y=antibiotics$growth)
 results[1,2] <- fit$value
-
-# Antibiotic 2 linear model results 
-initialGuess <- c(20,4,17,8,1)
-fit <- optim(par=initialGuess,fn=nlllinear,x=xvalues[,2],y=antibiotics$growth)
-results[2,2] <- fit$value
-
-# Antibiotic 3 linear model results
-initialGuess <- c(20,4,17,8,1)
-fit <- optim(par=initialGuess,fn=nlllinear,x=xvalues[,3],y=antibiotics$growth)
-results[3,2] <- fit$value
 
 #likelihood ratio test results
 A <- 2*(results[1,1]-results[1,2])
-B <- 2*(results[2,1]-results[2,2])
-C <- 2*(results[3,1]-results[3,2])
 results[1,3] <- pchisq(q=A, df=1, lower.tail=FALSE) 
-results[2,3] <- pchisq(q=B, df=1, lower.tail=FALSE) 
-results[3,3] <- pchisq(q=C, df=1, lower.tail=FALSE)
 results
