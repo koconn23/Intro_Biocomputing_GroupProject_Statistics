@@ -1,0 +1,84 @@
+---
+title: "PseudoCode_StatisticsProject"
+author: "Libby Fortin (efortin@nd.edu), Keith O'Connor (koconn23@nd.edu), Chelsea Weibel (cweibel@nd.edu)"
+date: "12/08/2017"
+output: html_document
+---
+
+#### Question 1: Evaluating the effect of three different new antibiotics on growth of E. coli in lab cultures.
+
+* Load ggplot2 for graphing.
+    + Import data from "antibiotics.csv" file.
+    + Create a box plot of "Antibiotic Type" vs. "E.coli Growth" using ggplot2.
+* Look at antibiotic treatments on the growth of E. coli using an ANOVA-design linear model and likelihood ratio test.
+    + Assign a value to the absence of antibiotic treatment and the presence of antibiotic treament. 
+    + For-loop that assigns a zero to the control treatment, and one to any of the antibiotic treatments.
+    + The for-loop below adds a column to the antibiotics dataset called 'aborct' entering zeros and ones to antibiotic treatment or no antibiotic treatment.
+* Subset the data into matrices that contain only the control data and one of the antibiotic treatments.
+    + There are three different matrices (ab1, ab2, and ab3) that represent the different types of antibiotics.
+    + For each matrix we add the control data and then below that we add the data for each antibiotic so that we can make comparisons between the control and antibiotic 1, 2, and 3.
+* Define our negative log likelihood functions
+    + One for the null model.
+    + One for the linear mode.
+* Run null and linear negative log likelihood models for the three different antibiotic treatments. 
+* Conduct the likelihood ratio test.
+* Store and print results.
+
+#### Question 2: Evaluating the effect of sugar concentration on growth of E. coli in lab cultures
+
+* Load ggplot2 for graphing.
+    + Import data from "sugar.csv" file.
+    + Create a scatter plot of "Sugar Concentration" vs. "E.coli Growth" using ggplot2 with a trendline.
+* Test effect of sugar concentration on growth of E. coli using a regression-design linear model and likelihood ratio test.
+    + Define our negative log likelihood functions
+    + One for the null model (growth of the E. coli is the same regardless of the sugar concentration).
+    + One for the linear model.
+* Conducted a likelihood ratio test.
+* Print results.
+
+#### Question 3: Statistical Power Analysis (Regression vs. ANOVA)
+
+##### Regression-designed Experiment
+
+* Create data based on given parameters.
+    + Create two empty data frames to store x and y matrices of variables.
+    + Randomly select 24 x-values between 0-50.
+    + Calculate the corresponding y-values based on a linear equation (m = 0.4 and b = 10).
+    + Run 10 monte carlos of this data using for-loops.
+    + Add noise to the data with 8 sigma values (1,2,4,6,8,12,16,24).
+
+* Run data through a null model.
+* Run data through a linear model.
+* Perform a likelihood ratio test.
+    + Average p-value across monte carlos.
+
+##### ANOVA-designed Experiment (2,4, and 8 level)
+
+* 2-level ANOVA
+    + Create two experimental trials to be 13 and 38 with 13 set as control variable. 
+    + Calculate y-values from a linear equation.
+    + Add noise to the data with 8 sigma values (1,2,4,6,8,12,16,24).
+    + Run data through a null model.
+    + Run data through a linear model.
+    + Perform a likelihood ratio test.
+    + Store and print results.
+    
+* 4-level ANOVA
+    + Create four experimental trials to be 10, 20, 30, and 40 with 10 set as the control variable.
+    + Calculate y-values from a linear equation.
+    + Add noise to the data with 8 sigma values (1,2,4,6,8,12,16,24).
+    + Run data through a null model.
+    + Run data through a linear model.
+    + Perform a likelihood ratio test.
+    + Store and print results.
+    
+* 8-level ANOVA
+    + Create eight experimental trials to be 5, 10, 15, 20, 25, 30, 35, 40 with 5 set as the control variable. 
+    + Calculate y-values from a linear equation.
+    + Add noise to the data with 8 sigma values (1,2,4,6,8,12,16,24).
+    + Run data through a null model.
+    + Run data through a linear model.
+    + Perform a likelihood ratio test.
+    + Store and print results.
+
+* Assess the ANOVA vs regression-design performance.
