@@ -3,26 +3,12 @@
 # Import the data set
 antibiotics <- read.csv("antibiotics.csv")
 
-# Since we're testing the difference between the presence of an antibiotic or not, this is a for-loop
-# that will put a zero for control, or no antibiotic, or a 1 for antibiotic in a new column in the data table
-# called 'aborct'
-for (i in 1:nrow(antibiotics)){
-  if (antibiotics$trt[i] == 'control'){
-    antibiotics$aborct[i] <- 0
-  }
-  else{
-    antibiotics$aborct[i] <- 1
-  }
-}
+# Since we're testing the difference between the influence of each individual antibiotic
+# 
+antibiotics$ab1 <- c(0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0)
+antibiotics$ab2 <- c(0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0)
+antibiotics$ab3 <- c(0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1)
 
-# These are all subsets of the data that contain the control and one of the antibiotics and the growth
-# associated with each treatment
-ab1 <- antibiotics[antibiotics$trt == 'control',]
-ab1[5:8,] <- antibiotics[antibiotics$trt == 'ab1',]
-ab2 <- antibiotics[antibiotics$trt == 'control',]
-ab2[5:8,] <- antibiotics[antibiotics$trt == 'ab2',]
-ab3 <- antibiotics[antibiotics$trt == 'control',]
-ab3[5:8,] <- antibiotics[antibiotics$trt == 'ab3',]
 
 # This is a matrix that will hold the negative log likelihood results of the null and linear models, and the
 # results of the likelihood ratio test
@@ -42,37 +28,34 @@ nllnull <- function(p,y){
 nlllinear <- function(p,x,y){
   B0=p[1]
   B1=p[2]
-  sig=exp(p[3])
-  expected=B0+B1*x
+  B2=p[3]
+  B3=p[4]
+  sig=exp(p[5])
+  expected=B0+B1*x[5:8]+B2*x[9:12]+B3*x[13:16]
   nll=-sum(dnorm(x=y, mean=expected, sd=sig,log=TRUE))
   return(nll)
 }
 
-# Antibiotic 1 null model and linear model results
+# Antibiotic null model
 initialGuess <- c(1,1)
-fit <- optim(par=initialGuess,fn=nllnull,y=ab1$growth)
+fit <- optim(par=initialGuess,fn=nllnull,y=antibiotics$growth)
 results[1,1] <- fit$value
-
-initialGuess <- c(1,1,1)
-fit <- optim(par=initialGuess,fn=nlllinear,x=ab1$aborct,y=ab1$growth)
-results[1,2] <- fit$value
-
-# Antibiotic 2 null model and linear model results 
-initialGuess <- c(1,1)
-fit <- optim(par=initialGuess,fn=nllnull,y=ab2$growth)
 results[2,1] <- fit$value
-
-initialGuess <- c(1,1,1)
-fit <- optim(par=initialGuess,fn=nlllinear,x=ab2$aborct,y=ab2$growth)
-results[2,2] <- fit$value
-
-# Antibiotic 3 null model and linear model results
-initialGuess <- c(1,1)
-fit <- optim(par=initialGuess,fn=nllnull,y=ab3$growth)
 results[3,1] <- fit$value
 
-initialGuess <- c(1,1,1)
-fit <- optim(par=initialGuess,fn=nlllinear,x=ab3$aborct,y=ab3$growth)
+# Antibiotic 1 linear model results 
+initialGuess <- c(1,1,1,1,1)
+fit <- optim(par=initialGuess,fn=nlllinear,x=antibiotics$ab1,y=antibiotics$growth)
+results[1,2] <- fit$value
+
+# Antibiotic 2 linear model results 
+initialGuess <- c(1,1,1,1,1)
+fit <- optim(par=initialGuess,fn=nlllinear,x=antibiotics$ab2,y=antibiotics$growth)
+results[2,2] <- fit$value
+
+# Antibiotic 3 linear model results
+initialGuess <- c(1,1,1,1,1)
+fit <- optim(par=initialGuess,fn=nlllinear,x=antibiotics$ab3,y=antibiotics$growth)
 results[3,2] <- fit$value
 
 #likelihood ratio test results
