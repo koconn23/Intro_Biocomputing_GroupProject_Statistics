@@ -1,11 +1,15 @@
 ---
 title: "Statistics Group Project Using R"
-author: "Libby Fortin (efortin@nd.edu), Keith O'Connor (koconn23@nd.edu), Chelsea Weibel (cweibel@nd.edu)"
+author: Libby Fortin (efortin@nd.edu), Keith O'Connor (koconn23@nd.edu), Chelsea Weibel
+  (cweibel@nd.edu)
 date: "11/27/2017"
-output: html_document
+output:
+  html_document: default
+  pdf_document: default
 ---
 
-## Question 1: Evaluating the effect of three different new antibiotics on growth of E. coli in lab cultures.
+## Question 1: Evaluating the effect of three different new antibiotics on growth of E. coli in lab cultures
+
 ##### Let's visualize the data using ggplot. Since the data is categorical we use a boxplot:
 ```{r}
 
@@ -80,7 +84,7 @@ mean(antibiotics$growth[antibiotics$trt=='ab2'])
 mean(antibiotics$growth[antibiotics$trt=='ab3'])
 ```
 
-##### Now we run the models, the null model only has to be run once and the linear model has to be run three times with each antibiotic having an effect each run
+##### Now we run the models
 ```{r}
 # Antibiotic null model
 initialGuess <- c(20,1)
@@ -108,8 +112,6 @@ results
 ##### Let's visualize the data using ggplot. Since the data is continuous we use a linear plot. We can also add the linear equation and R^2^ value to the graph to tell us more about the data.
 ```{r}
 #### Linear plot of sugar effects on growth with line equation and R2 ####
-
-library(ggplot2)
 
 sugardata <- read.csv(file = "sugar.csv", header=TRUE) # Importing the data
 
@@ -195,7 +197,7 @@ lrt = pchisq(q=q, df=1, lower.tail=FALSE) # Running the likelihood ratio test
 print(lrt)
 ```
 
-##### Becuase the p-value is less than 0.05 (2.64e-10), this means that we can reject the null hypothesis and conclude that there is a significant effect of sugar concentration on E. coli growth
+##### Becuase the p-value is less than 0.05, this means that we can reject the null hypothesis and conclude that there is a significant effect of sugar concentration on E. coli growth
 
 
 
@@ -248,7 +250,7 @@ for (sim_number in 1:num_sims){
 #Null Model function
 
 null.value.mat <- matrix(NA,8,10) # Empty matrix to store the value outputs from each model run
-null.par.mat <- array(NA,dim = c(2,8,10)) # Empty matrix to store the paramter outputs from each model run
+null.par.mat <- array(NA,dim = c(2,8,10)) # Empty array to store the paramter outputs from each model run
 
 nllnull <- function(p,y){ # Null model
   B0=p[1]
@@ -267,7 +269,7 @@ for(sigma_number in 1:8){ # Running through each sigma value (each sheet in the 
                      y=as.matrix(youtput[[sigma_number]][,num_sims])) # Optimizing the model
 
         null.value.mat[sigma_number,num_sims] <- null$value # This stores the value output from each monte carlo into a matrix
-        null.par.mat[,sigma_number,num_sims] <- null$par # This stores the parameter outputs from each monte carlo into a matrix
+        null.par.mat[,sigma_number,num_sims] <- null$par # This stores the parameter outputs from each monte carlo into an array
     }
 }
 ```
@@ -279,7 +281,7 @@ for(sigma_number in 1:8){ # Running through each sigma value (each sheet in the 
 #Linear Model function
 
 linear.value.mat <- matrix(NA,8,10) # Empty matrix to store the value outputs from each model run
-linear.par.mat <- array(NA,dim = c(3,8,10)) # Empty matrix to store the paramter outputs from each model run
+linear.par.mat <- array(NA,dim = c(3,8,10)) # Empty array to store the paramter outputs from each model run
 
 nlllinear <- function(p,x,y){ # Linear Model
   B0=p[1]
@@ -304,7 +306,7 @@ for(sigma_number in 1:8){ # Running through each sigma value (each sheet in the 
 }
 ```
 
-##### We then performed a likelihood ratio test to determine if there was a significant difference in the fit between our null and linear models.
+##### We then performed a likelihood ratio test to determine if there was a significant difference in the fit between our null and linear models
 
 ```{r}
 ####### Likelihood ratio test
@@ -314,7 +316,7 @@ lrt.value <- matrix(NA,8,10) # Empty matrix to store the p-values
 for(sigma_number in 1:8){ # Start of for loop 1
     for(num_sims in 1:10){ # Start of for loop 2
       
-      q = 2*(null.value.mat[sigma_number,num_sims]-linear.value.mat[sigma_number,num_sims]) # Calculating the q-value for each cell - subtracting the null value from the linear value and multiplying by 2
+      q = 2*(null.value.mat[sigma_number,num_sims]-linear.value.mat[sigma_number,num_sims]) # Calculating the q-value for each cell - subtracting the linear value from the null value and multiplying by 2
       lrt = pchisq(q=q, df=1, lower.tail=FALSE) # Conducting the likelihood ratio test
       lrt.value[sigma_number,num_sims] <- lrt # Storing the outputs from the likelihood ratio test in the matrix that was created earlier
     }
@@ -325,7 +327,7 @@ for (sigma_number in 1:8){
   print(mean(lrt.value[sigma_number,]))
 }
 ```
-##### The p-values are significnat until we get to the sixth sigma value (sigma=12).
+##### The p-values are significnat (less than 0.05) until we get to the sixth sigma value (sigma=12).
 
 
 
@@ -341,9 +343,9 @@ for (sigma_number in 1:8){
 x2 = c(13,13,13,13,13,13,13,13,13,13,13,13,38,38,38,38,38,38,38,38,38,38,38,38) # Creating a vector of x-values
 x_values2 = matrix(rep(x2,10),nrow=24,ncol=10) # Creating a matrix of x-values for the ten monte carlos
 
-y2 <-  .4 * x_values2 + 10 # calculating the y-values based on the x-values
+y2 <-  .4 * x_values2 + 10 # Calculating the y-values based on the x-values
 
-youtput2 <-list() # creating an empty list that will store the y-values once we add some noise
+youtput2 <-list() # Creating an empty list that will store the y-values once we add some noise
 
 # This for loop inserts empty data frames into the above list that will store the y-values once we add some noise
 for(sigma_number in 1:sigma_num){
@@ -365,7 +367,7 @@ for (sigma_number in 1:8){
 
 for (i in 1:nrow(x_values2)){ # Runs the for loop through each row of the matrix
   for(j in 1:ncol(x_values2)){ # Runs the for loop through each column of the matrix
-  if (x_values2[i,j] == '13'){ # If the x values equal to 13 then...
+  if (x_values2[i,j] == '13'){ # If the x values equal 13 then...
     x_values2[i,j] <- 0 ### ... they becomes 0
   }
   else{ # Otherwise, if the x values are not equal to 13 then...
@@ -424,7 +426,7 @@ for(sigma_number in 1:8){ # To run the model through each sheet of y-values (eac
                      y=as.matrix(youtput2[[sigma_number]][,num_sims])) # Optimizing the model
 
         A2.null.value.mat[sigma_number,num_sims] <- null$value # Storing the value outputs into a matrix
-        A2.null.par.mat[,sigma_number,num_sims] <- null$par # Storing the parameter outputs into a matrix
+        A2.null.par.mat[,sigma_number,num_sims] <- null$par # Storing the parameter outputs into an array
     }
 }
 
@@ -451,7 +453,7 @@ lrt.value.A2 <- matrix(NA,8,10) # Empty matrix to store the p-values
 for(sigma_number in 1:8){ # Start of for loop 1
     for(num_sims in 1:10){ # Start of for loop 2
       
-      q = 2*(A2.null.value.mat[sigma_number,num_sims]-A2.linear.value.mat[sigma_number,num_sims]) # Calculating the q-value for each cell - subtracting the null value from the linear value and multiplying by 2
+      q = 2*(A2.null.value.mat[sigma_number,num_sims]-A2.linear.value.mat[sigma_number,num_sims]) # Calculating the q-value for each cell - subtracting the linear value from the null value and multiplying by 2
       lrt = pchisq(q=q, df=1, lower.tail=FALSE) # Conducting the likelihood ratio test
       lrt.value.A2[sigma_number,num_sims] <- lrt # Storing the outputs from the likelihood ratio test in the matrix that was created earlier
     }
@@ -462,7 +464,7 @@ for (sigma_number in 1:8){
   print(mean(lrt.value.A2[sigma_number,]))
 }
 ```
-##### The p-values are significnat until we get to the sixth sigma value (sigma=12).
+##### The p-values are significnat (less than 0.05) until we get to the sixth sigma value (sigma=12).
 
 
 ### 4-level ANOVA
@@ -476,7 +478,7 @@ x4 = c(10,10,10,10,10,10,20,20,20,20,20,20,30,30,30,30,30,30,40,40,40,40,40,40) 
 x_values4 = matrix(rep(x4,10),nrow=24,ncol=10) # Matrix of x-values for each monte carlo
 
 
-y4 <- .4 * x_values4 + 10 # Calculating the y-values the correspond with each x-value based on the linear equation
+y4 <- .4 * x_values4 + 10 # Calculating the y-values that correspond with each x-value based on the linear equation
 
 youtput4 <-list() # An empty list to store the y-output values once we have added some noise to the data
 
@@ -583,7 +585,7 @@ lrt.value.A4 <- matrix(NA,8,10) # Empty matrix to store the p-values
 for(sigma_number in 1:8){ # Start of for loop 1
     for(num_sims in 1:10){ # Start of for loop 2
       
-      q = 2*(A4.null.value.mat[sigma_number,num_sims]-A4.linear.value.mat[sigma_number,num_sims]) # Calculating the q-value for each cell - subtracting the null value from the linear value and multiplying by 2
+      q = 2*(A4.null.value.mat[sigma_number,num_sims]-A4.linear.value.mat[sigma_number,num_sims]) # Calculating the q-value for each cell - subtracting the linear value from the null value and multiplying by 2
       lrt = pchisq(q=q, df=3, lower.tail=FALSE) # Conducting the likelihood ratio test
       lrt.value.A4[sigma_number,num_sims] <- lrt # Storing the outputs from the likelihood ratio test in the matrix that was created earlier
     }
@@ -594,12 +596,12 @@ for (sigma_number in 1:8){
   print(mean(lrt.value.A4[sigma_number,]))
 }
 ```
-##### The p-values are significnat until we get to the sixth sigma value (sigma=12).
+##### The p-values are significnat (less than 0.05) until we get to the fifth sigma value (sigma=8).
 
 
 ### 8-level ANOVA
 
-##### First we set our eight experimental trials to be 5, 10, 15, 20, 25, 30, 35, 40. Each trial was replicated three times for each monte carlo replicate. We then calculated our y-values from a linear equation and added some noise to the data with 8 sigma values between 1 and 24.
+##### First we set our eight experimental trials to be 5, 10, 15, 20, 25, 30, 35, 40 - x=5 was set as the control. Each trial was replicated three times for each monte carlo replicate. We then calculated our y-values from a linear equation and added some noise to the data with 8 sigma values between 1 and 24.
 
 ```{r}
 ## 8-level ANOVA ##
@@ -720,7 +722,7 @@ lrt.value.A8 <- matrix(NA,8,10) # Empty matrix to store the p-values
 for(sigma_number in 1:8){ # Start of for loop 1
     for(num_sims in 1:10){ # Start of for loop 2
       
-      q = 2*(A8.null.value.mat[sigma_number,num_sims]-A8.linear.value.mat[sigma_number,num_sims]) # Calculating the q-value for each cell - subtracting the null value from the linear value and multiplying by 2
+      q = 2*(A8.null.value.mat[sigma_number,num_sims]-A8.linear.value.mat[sigma_number,num_sims]) # Calculating the q-value for each cell - subtracting the linear value from the null value and multiplying by 2
       lrt = pchisq(q=q, df=7, lower.tail=FALSE) # Conducting the likelihood ratio test
       lrt.value.A8[sigma_number,num_sims] <- lrt # Storing the outputs from the likelihood ratio test in the matrix that was created earlier
     }
@@ -769,8 +771,3 @@ for (sigma_number in 1:8){
 ##### Overall, the regression-design performs better than the 2-level, 4-level and 8-level ANOVA-designs; we can conclude this by looking at the corresponding p-values bewteen the four different designs.
 
 ##### Additionally, as the number of levels in the ANOVA increased, the statistical power decreased (i.e. the 2-level performed better than the 4-level, which performed better than the 8-level). A likely explanation for this is the difference in the sample size across the different designs. Because the number of observations for each trial was held constant at 24, this meant that as the number of levels in the ANOVA-design increased, the sample size decreased for each treatment.
-
-
-
-
-

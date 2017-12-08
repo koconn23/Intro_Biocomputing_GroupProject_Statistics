@@ -11,16 +11,11 @@ output: html_document
     + Import data from "antibiotics.csv" file.
     + Create a box plot of "Antibiotic Type" vs. "E.coli Growth" using ggplot2.
 * Look at antibiotic treatments on the growth of E. coli using an ANOVA-design linear model and likelihood ratio test.
-    + Assign a value to the absence of antibiotic treatment and the presence of antibiotic treament. 
-    + For-loop that assigns a zero to the control treatment, and one to any of the antibiotic treatments.
-    + The for-loop below adds a column to the antibiotics dataset called 'aborct' entering zeros and ones to antibiotic treatment or no antibiotic treatment.
-* Subset the data into matrices that contain only the control data and one of the antibiotic treatments.
-    + There are three different matrices (ab1, ab2, and ab3) that represent the different types of antibiotics.
-    + For each matrix we add the control data and then below that we add the data for each antibiotic so that we can make comparisons between the control and antibiotic 1, 2, and 3.
+    + Assign a value to the absence of antibiotic treatment (0) and the presence of antibiotic treament (1) - we will need a 3-column matrix that will assign a "1" to each of the different antibiotic treatments in a different column. The control will always be "0".
 * Define our negative log likelihood functions
     + One for the null model.
     + One for the linear mode.
-* Run null and linear negative log likelihood models for the three different antibiotic treatments. 
+* Run null and linear negative log likelihood models. 
 * Conduct the likelihood ratio test.
 * Store and print results.
 
@@ -29,10 +24,10 @@ output: html_document
 * Load ggplot2 for graphing.
     + Import data from "sugar.csv" file.
     + Create a scatter plot of "Sugar Concentration" vs. "E.coli Growth" using ggplot2 with a trendline.
-* Test effect of sugar concentration on growth of E. coli using a regression-design linear model and likelihood ratio test.
-    + Define our negative log likelihood functions
+* Define our negative log likelihood functions
     + One for the null model (growth of the E. coli is the same regardless of the sugar concentration).
     + One for the linear model.
+* Run null and linear negative log likelihood models. 
 * Conducted a likelihood ratio test.
 * Print results.
 

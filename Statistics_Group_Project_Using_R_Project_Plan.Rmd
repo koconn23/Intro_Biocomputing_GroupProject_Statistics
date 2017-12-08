@@ -25,7 +25,7 @@ output: html_document
 
 + Keep working on questions above if need more time. 
 
-+ Once finished, everyone help on data generation for power analysis, meet with Meredith for questions.
++ Once finished, everyone help on data generation for power analysis, meet with Meredith/Ann for questions.
 
 ### 12/4/2017
 
@@ -51,7 +51,7 @@ output: html_document
 
 + Finalize plan R-markdown to be formatted correctly. 
 
-+ Clean-up Github repo to only contain necessary files, add comments if necessary?
++ Clean-up Github repo to only contain necessary files, add comments if necessary
 
 
 
